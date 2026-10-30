@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Research Agent — Liquid Glass Review Dashboard</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* -------------------------------------------------------------
+       CSS Custom Properties: Liquid Glass Design System
+       ------------------------------------------------------------- */
+    :root {
+      /* Liquid glass backgrounds & blur */
+      --glass-bg: rgba(255, 255, 255, 0.42);
+      --glass-bg-hover: rgba(255, 255, 255, 0.58);
+      --glass-bg-active: rgba(255, 255, 255, 0.72);
+      --glass-fallback: rgba(255, 255, 255, 0.88);
+      --glass-blur: 20px;
+      --glass-blur-hover: 26px;
+      --glass-saturate: 140%;
+
+      /* Crisp glass borders & diffused floating drop shadows */
+      --glass-border: 1px solid rgba(255, 255, 255, 0.75);
+      --glass-border-subtle: 1px solid rgba(255, 255, 255, 0.45);
+      --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
+      --glass-shadow-hover: 0 10px 36px rgba(31, 38, 135, 0.12);
+
+      /* Typography: High-contrast Dark Charcoal on Translucent Glass */
+      --text-main: #1f2430;
+      --text-muted: #5b6275;
+      --text-subtle: #7e8699;
+
+      /* Primary accent: Crisp Royal Indigo/Blue */
+      --accent: #4353ff;
+      --accent-hover: #3242e8;
+      --accent-soft: rgba(67, 83, 255, 0.12);
+
+      /* Soft Tinted Glass Semantic Chips */
+      --badge-amber-bg: rgba(245, 158, 11, 0.15);
+      --badge-amber-border: rgba(245, 158, 11, 0.35);
+      --badge-amber-text: #92400e;
+
+      --badge-blue-bg: rgba(59, 130, 246, 0.15);
+      --badge-blue-border: rgba(59, 130, 246, 0.35);
+      --badge-blue-text: #1d4ed8;
+
+      --badge-green-bg: rgba(16, 185, 129, 0.15);
+      --badge-green-border: rgba(16, 185, 129, 0.35);
+      --badge-green-text: #065f46;
+
+      --badge-red-bg: rgba(239, 68, 68, 0.15);
+      --badge-red-border: rgba(239, 68, 68, 0.35);
+      --badge-red-text: #991b1b;
+
+      --badge-gray-bg: rgba(100, 116, 139, 0.15);
+      --badge-gray-border: rgba(100, 116, 139, 0.35);
+      --badge-gray-text: #334155;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --radius-pill: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* -------------------------------------------------------------
+       Light Airy Canvas: Drifting Soft Pastel Mesh Gradients
+       ------------------------------------------------------------- */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      background-color: #f0f4f9;
+      background-image:
+        radial-gradient(at 10% 15%, rgba(186, 230, 253, 0.75) 0px, transparent 50%),
+        radial-gradient(at 85% 10%, rgba(233, 213, 255, 0.8) 0px, transparent 50%),
+        radial-gradient(at 45% 55%, rgba(204, 251, 241, 0.7) 0px, transparent 55%),
+        radial-gradient(at 80% 85%, rgba(199, 210, 254, 0.75) 0px, transparent 50%),
+        radial-gradient(at 15% 90%, rgba(224, 231, 255, 0.8) 0px, transparent 50%);
+      background-size: 140% 140%;
+      background-attachment: fixed;
+      animation: gradientDrift 28s ease infinite alternate;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    @keyframes gradientDrift {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 30% 100%; }
+    }
+
+    /* Fallback solid background for browsers without backdrop-filter support */
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .glass-panel, .glass-card, .sidebar, .top-bar, .toast, .stat-card {
+        background-color: var(--glass-fallback) !important;
+      }
+    }
+
+    /* Standard Glass Panel Mixin Class */
+    .glass-panel {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      border: var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      transition: background-color 200ms ease, box-shadow 200ms ease, -webkit-backdrop-filter 200ms ease, backdrop-filter 200ms ease;
+    }
+
+    /* Visible Keyboard Focus Rings */
+    button:focus-visible, a:focus-visible, input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* -------------------------------------------------------------
+       Sidebar Layout (Frosted Glass on Desktop, Floating Bottom Dock on Mobile)
+       ------------------------------------------------------------- */
+    .sidebar {
+      width: 260px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      flex-shrink: 0;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      border-right: var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 18px;
+      z-index: 40;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 8px 24px 8px;
+      border-bottom: var(--glass-border-subtle);
+      margin-bottom: 20px;
+    }
+
+    .brand-logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4353ff, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(67, 83, 255, 0.28);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Navigation list */
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      list-style: none;
+      flex: 1;
+    }
+
+    .nav-item-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+    }
+
+    .nav-item-btn:hover {
+      background: var(--glass-bg-hover);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .nav-item-btn.active {
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--accent);
+      font-weight: 600;
+      border: var(--glass-border);
+      box-shadow: 0 4px 16px rgba(31, 38, 135, 0.05);
+    }
+
+    .nav-label-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-count-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: var(--radius-pill);
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nav-item-btn.active .nav-count-badge {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    /* Export Approved in Sidebar Footer */
+    .sidebar-footer {
+      padding-top: 18px;
+      border-top: var(--glass-border-subtle);
+    }
+
+    .btn-export {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--glass-bg);
+      border: var(--glass-border);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: var(--glass-shadow);
+      cursor: pointer;
+      transition: background-color 200ms ease, box-shadow 200ms ease;
+    }
+
+    .btn-export:hover {
+      background: var(--glass-bg-hover);
+      box-shadow: var(--glass-shadow-hover);
+    }
+
+    /* -------------------------------------------------------------
+       Main Content Layout
+       ------------------------------------------------------------- */
+    .main-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 60px;
+    }
+
+    /* Top Glass Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      border-bottom: var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .page-title-wrap h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .top-bar-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      max-width: 580px;
+      justify-content: flex-end;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 380px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      pointer-events: none;
+      display: flex;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px 0 36px;
+      border-radius: var(--radius-sm);
+      border: var(--glass-border);
+      background: rgba(255, 255, 255, 0.5);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      color: var(--text-main);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: background-color 180ms ease, border-color 180ms ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .search-input:focus {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: var(--accent);
+    }
+
+    /* Primary Run Action Button */
+    .btn-run {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 18px;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(67, 83, 255, 0.3);
+      transition: background-color 180ms ease, opacity 180ms ease;
+    }
+
+    .btn-run:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-run:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* Page Container */
+    .page-container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 32px;
+      width: 100%;
+    }
+
+    /* Error Banner */
+    .error-banner {
+      background: rgba(254, 226, 226, 0.7);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .error-banner-text {
+      color: #991b1b;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-retry {
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #991b1b;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 150ms ease;
+    }
+
+    .btn-retry:hover {
+      background: rgba(239, 68, 68, 0.28);
+    }
+
+    /* -------------------------------------------------------------
+       Row of 4 Glass Stat Cards
+       ------------------------------------------------------------- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      border: var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      box-shadow: var(--glass-shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background-color 200ms ease, box-shadow 200ms ease;
+    }
+
+    .stat-card:hover {
+      background: var(--glass-bg-hover);
+      box-shadow: var(--glass-shadow-hover);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .stat-val {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: var(--glass-border);
+    }
+
+    .stat-icon-total { background: rgba(67, 83, 255, 0.1); color: var(--accent); }
+    .stat-icon-verify { background: var(--badge-amber-bg); color: var(--badge-amber-text); }
+    .stat-icon-app { background: var(--badge-green-bg); color: var(--badge-green-text); }
+    .stat-icon-rej { background: var(--badge-red-bg); color: var(--badge-red-text); }
+
+    /* -------------------------------------------------------------
+       "Last Run" Glass Card (Updates after research run)
+       ------------------------------------------------------------- */
+    .last-run-card {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      border: var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      box-shadow: var(--glass-shadow);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .last-run-title {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .last-run-metrics {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+    }
+
+    .last-run-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    .last-run-badge strong {
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* -------------------------------------------------------------
+       Topic Cards Grid (3 cols on desktop, 2 on tablet, 1 on mobile)
+       ------------------------------------------------------------- */
+    .topics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      border: var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--glass-shadow);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
+    }
+
+    .glass-card:hover {
+      background: var(--glass-bg-hover);
+      box-shadow: var(--glass-shadow-hover);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Title: 16px semibold, max 2 lines with ellipsis */
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 6px;
+    }
+
+    /* Meta line: source, published date, status badge with separators */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meta-sep {
+      color: var(--text-subtle);
+      font-size: 10px;
+      user-select: none;
+    }
+
+    /* Soft Tinted Glass Semantic Chips */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.4;
+      border: 1px solid transparent;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .badge-needs-verification {
+      background: var(--badge-amber-bg);
+      border-color: var(--badge-amber-border);
+      color: var(--badge-amber-text);
+    }
+    .badge-verified {
+      background: var(--badge-blue-bg);
+      border-color: var(--badge-blue-border);
+      color: var(--badge-blue-text);
+    }
+    .badge-approved {
+      background: var(--badge-green-bg);
+      border-color: var(--badge-green-border);
+      color: var(--badge-green-text);
+    }
+    .badge-rejected {
+      background: var(--badge-red-bg);
+      border-color: var(--badge-red-border);
+      color: var(--badge-red-text);
+    }
+    .badge-duplicate {
+      background: var(--badge-gray-bg);
+      border-color: var(--badge-gray-border);
+      color: var(--badge-gray-text);
+    }
+
+    /* Score Pill: compact (green 70+, amber 40-69, gray below 40) */
+    .score-pill {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+      border: 1px solid transparent;
+      align-self: flex-start;
+      margin-top: 2px;
+    }
+
+    .score-pill.score-high {
+      background: var(--badge-green-bg);
+      border-color: var(--badge-green-border);
+      color: var(--badge-green-text);
+    }
+    .score-pill.score-mid {
+      background: var(--badge-amber-bg);
+      border-color: var(--badge-amber-border);
+      color: var(--badge-amber-text);
+    }
+    .score-pill.score-low {
+      background: var(--badge-gray-bg);
+      border-color: var(--badge-gray-border);
+      color: var(--badge-gray-text);
+    }
+
+    /* Summary: 14px, 2-line clamped */
+    .summary-text {
+      font-size: 14px;
+      color: #3b4252;
+      line-height: 1.55;
+    }
+
+    .summary-text.clamped {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .read-more-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .read-more-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* -------------------------------------------------------------
+       Expandable Details Section
+       ------------------------------------------------------------- */
+    .card-expanded-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 240ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .card-expanded-content {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: var(--glass-border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .detail-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .key-points-list {
+      padding-left: 18px;
+      color: var(--text-main);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .key-points-list li {
+      margin-bottom: 3px;
+    }
+
+    .evidence-box {
+      font-size: 13px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.35);
+      border: var(--glass-border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .source-links-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .source-link-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      word-break: break-all;
+    }
+
+    .source-link-item a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .source-link-item a:hover {
+      text-decoration: underline;
+    }
+
+    .no-primary-note {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--badge-amber-bg);
+      border: 1px solid var(--badge-amber-border);
+      color: var(--badge-amber-text);
+    }
+
+    /* Action Buttons in Card (Approve / Reject) */
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 6px;
+      padding-top: 10px;
+      border-top: var(--glass-border-subtle);
+    }
+
+    .btn-action {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background-color 150ms ease, border-color 150ms ease;
+    }
+
+    .btn-approve {
+      background: var(--badge-green-bg);
+      border-color: var(--badge-green-border);
+      color: var(--badge-green-text);
+    }
+
+    .btn-approve:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-reject {
+      background: var(--badge-red-bg);
+      border-color: var(--badge-red-border);
+      color: var(--badge-red-text);
+    }
+
+    .btn-reject:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Subtle row animations */
+    @keyframes cardFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .card-fade-in {
+      animation: cardFadeIn 180ms ease forwards;
+    }
+
+    .card-fade-out {
+      opacity: 0 !important;
+      transition: opacity 180ms ease !important;
+      pointer-events: none;
+    }
+
+    .spinner {
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* -------------------------------------------------------------
+       Empty State & Skeletons
+       ------------------------------------------------------------- */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 64px 20px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+      border: var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--glass-shadow);
+      color: var(--text-muted);
+    }
+
+    .empty-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+    }
+
+    .empty-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .empty-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 420px;
+      margin: 0 auto 18px auto;
+    }
+
+    /* Skeleton Placeholder Shimmer */
+    .skeleton-card {
+      background: var(--glass-bg);
+      border: var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.4) 25%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0.4) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.6s infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .sk-title { height: 20px; width: 75%; }
+    .sk-meta { height: 14px; width: 45%; }
+    .sk-line { height: 14px; width: 95%; }
+
+    /* -------------------------------------------------------------
+       Toast Notification System (Top Right)
+       ------------------------------------------------------------- */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      max-width: 420px;
+      width: calc(100% - 40px);
+    }
+
+    .glass-toast {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.65);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      backdrop-filter: blur(24px) saturate(150%);
+      border: var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: 0 12px 40px rgba(31, 38, 135, 0.15);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+
+    .glass-toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast-icon {
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+    }
+
+    .toast-body {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .toast-message {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .toast-success .toast-icon { color: var(--badge-green-text); }
+    .toast-error .toast-icon { color: var(--badge-red-text); }
+    .toast-info .toast-icon { color: var(--accent); }
+
+    /* -------------------------------------------------------------
+       Responsive Breakpoints (Desktop vs Mobile Bottom Dock)
+       ------------------------------------------------------------- */
+    @media (max-width: 1080px) {
+      .topics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        padding-bottom: 90px; /* Safe space so bottom dock never covers content */
+      }
+
+      /* Desktop sidebar transforms into a floating frosted-glass bottom dock */
+      .sidebar {
+        position: fixed;
+        top: auto;
+        bottom: 14px;
+        left: 14px;
+        right: 14px;
+        width: auto;
+        height: auto;
+        border-radius: var(--radius-lg);
+        border: var(--glass-border);
+        box-shadow: 0 12px 40px rgba(31, 38, 135, 0.18);
+        padding: 8px 12px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        z-index: 100;
+      }
+
+      .sidebar-header, .sidebar-footer {
+        display: none;
+      }
+
+      .nav-list {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+        gap: 2px;
+      }
+
+      .nav-item-btn {
+        flex-direction: column;
+        padding: 6px 8px;
+        font-size: 10px;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .nav-label-wrap {
+        flex-direction: column;
+        gap: 2px;
+        align-items: center;
+      }
+
+      .nav-count-badge {
+        display: none; /* Hide count badge on tight mobile dock */
+      }
+
+      .top-bar {
+        padding: 12px 18px;
+        flex-wrap: wrap;
+      }
+
+      .page-container {
+        padding: 20px 18px;
+      }
+
+      .topics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* -------------------------------------------------------------
+       Accessibility: Respect prefers-reduced-motion
+       ------------------------------------------------------------- */
+    @media (prefers-reduced-motion: reduce) {
+      body {
+        animation: none !important;
+      }
+      *, *::before, *::after {
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- -----------------------------------------------------------
+       Sidebar / Floating Mobile Bottom Dock
+       ----------------------------------------------------------- -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div>
+      <div class="sidebar-header">
+        <div class="brand-logo-icon" aria-hidden="true">
+          <!-- Sparkle / Research Logo SVG -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">AI Research</div>
+          <div class="brand-sub">Review Dashboard</div>
+        </div>
+      </div>
+
+      <!-- Navigation Views -->
+      <nav aria-label="Status filter views">
+        <ul class="nav-list">
+          <li>
+            <button class="nav-item-btn active" data-filter="All" onclick="setFilter('All', this)">
+              <div class="nav-label-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/>
+                  <rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>
+                </svg>
+                <span>All Topics</span>
+              </div>
+              <span class="nav-count-badge" id="nav-count-all">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item-btn" data-filter="Needs Verification" onclick="setFilter('Needs Verification', this)">
+              <div class="nav-label-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>Needs Verification</span>
+              </div>
+              <span class="nav-count-badge" id="nav-count-needs-verification">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item-btn" data-filter="Verified" onclick="setFilter('Verified', this)">
+              <div class="nav-label-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Verified</span>
+              </div>
+              <span class="nav-count-badge" id="nav-count-verified">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item-btn" data-filter="Approved" onclick="setFilter('Approved', this)">
+              <div class="nav-label-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span>Approved</span>
+              </div>
+              <span class="nav-count-badge" id="nav-count-approved">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item-btn" data-filter="Rejected" onclick="setFilter('Rejected', this)">
+              <div class="nav-label-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span>Rejected</span>
+              </div>
+              <span class="nav-count-badge" id="nav-count-rejected">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item-btn" data-filter="Duplicate" onclick="setFilter('Duplicate', this)">
+              <div class="nav-label-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="13" height="13" x="9" y="9" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                <span>Duplicates</span>
+              </div>
+              <span class="nav-count-badge" id="nav-count-duplicate">0</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Sidebar Bottom Action -->
+    <div class="sidebar-footer">
+      <a
+        id="export-btn"
+        class="btn-export"
+        href="/export?status=Approved&format=csv"
+        download="research_export.csv"
+        title="Download Approved topics as CSV"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Export Approved</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- -----------------------------------------------------------
+       Main Area
+       ----------------------------------------------------------- -->
+  <div class="main-wrap">
+
+    <!-- Top Frosted-Glass Bar -->
+    <header class="top-bar">
+      <div class="page-title-wrap">
+        <h1 id="page-title">All Topics</h1>
+      </div>
+
+      <div class="top-bar-controls">
+        <!-- Live Search Input -->
+        <div class="search-input-wrap">
+          <span class="search-icon" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Filter by title or summary..."
+            aria-label="Filter topics by title or summary"
+            oninput="handleSearch(this.value)"
+          >
+        </div>
+
+        <!-- Run Research Now Action -->
+        <button id="run-btn" class="btn-run" onclick="triggerResearch()">
+          <span id="run-btn-icon" style="display: flex;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </span>
+          <span id="run-btn-text">Run Research Now</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Body Container -->
+    <div class="page-container">
+
+      <!-- Server Error Banner -->
+      <div id="error-banner" class="error-banner" role="alert">
+        <div class="error-banner-text">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="error-banner-message">Unable to reach the backend server.</span>
+        </div>
+        <button class="btn-retry" onclick="retryConnection()">Retry</button>
+      </div>
+
+      <!-- Row of 4 Glass Stat Cards -->
+      <section class="stats-row" aria-label="Topic Summary Statistics">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Total Topics</div>
+            <div id="stat-total" class="stat-val">0</div>
+          </div>
+          <div class="stat-icon-wrap stat-icon-total">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Needs Verification</div>
+            <div id="stat-needs-verification" class="stat-val">0</div>
+          </div>
+          <div class="stat-icon-wrap stat-icon-verify">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Approved</div>
+            <div id="stat-approved" class="stat-val">0</div>
+          </div>
+          <div class="stat-icon-wrap stat-icon-app">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Rejected</div>
+            <div id="stat-rejected" class="stat-val">0</div>
+          </div>
+          <div class="stat-icon-wrap stat-icon-rej">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- "Last Run" Glass Card -->
+      <section class="last-run-card" id="last-run-container" aria-label="Latest Research Run Summary">
+        <div class="last-run-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>Latest Run Summary</span>
+        </div>
+        <div class="last-run-metrics" id="last-run-metrics">
+          <span class="last-run-badge">Found: <strong id="lr-found">0</strong></span>
+          <span class="last-run-badge">Saved: <strong id="lr-saved">0</strong></span>
+          <span class="last-run-badge">Duplicates: <strong id="lr-duplicates">0</strong></span>
+          <span class="last-run-badge">Skipped: <strong id="lr-skipped">0</strong></span>
+          <span class="last-run-badge">Rejected: <strong id="lr-rejected">0</strong></span>
+          <span class="last-run-badge">Failed: <strong id="lr-failed">0</strong></span>
+        </div>
+      </section>
+
+      <!-- Responsive Grid of Glass Topic Cards -->
+      <main class="topics-grid" id="topics-container" aria-live="polite">
+        <!-- Skeleton placeholders render here while fetching -->
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Glass Toast Notification Stack -->
+  <div id="toast-container" aria-live="assertive"></div>
+
+  <!-- -------------------------------------------------------------
+       Client Application Logic
+       ------------------------------------------------------------- -->
+  <script>
+    // State
+    let activeFilter = "All";
+    let searchQuery = "";
+    let cachedTopics = [];
+    let previousStatCounts = { total: 0, needsVerification: 0, approved: 0, rejected: 0 };
+
+    /* -----------------------------------------------------------
+       HTML Escaping & Helpers
+       ----------------------------------------------------------- */
+    function escapeHtml(text) {
+      if (text === null || text === undefined) return "";
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getDomainFromUrl(urlStr) {
+      if (!urlStr) return "";
+      try {
+        const parsed = new URL(urlStr);
+        return parsed.hostname.replace(/^www\./, "");
+      } catch (e) {
+        return urlStr;
+      }
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "";
+      try {
+        const d = new Date(dateStr.replace(" ", "T") + "Z");
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    function getStatusBadgeConfig(status) {
+      switch (status) {
+        case "Verified":
+          return { className: "badge-verified", label: "Verified" };
+        case "Approved":
+          return { className: "badge-approved", label: "Approved" };
+        case "Rejected":
+          return { className: "badge-rejected", label: "Rejected" };
+        case "Duplicate":
+          return { className: "badge-duplicate", label: "Duplicate" };
+        default:
+          return { className: "badge-needs-verification", label: "Needs Verification" };
+      }
+    }
+
+    function getScorePillClass(score) {
+      if (score >= 70) return "score-high";
+      if (score >= 40) return "score-mid";
+      return "score-low";
+    }
+
+    function parseKeyPoints(raw) {
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw;
+      return String(raw)
+        .split(/\r?\n/)
+        .map(line => line.replace(/^[-*•\d.]+\s*/, "").trim())
+        .filter(line => line.length > 0);
+    }
+
+    /* -----------------------------------------------------------
+       Stats Counter Animation (Subtle Count-up)
+       ----------------------------------------------------------- */
+    function animateCountUp(elementId, startVal, endVal, duration = 350) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReducedMotion || startVal === endVal) {
+        el.textContent = endVal.toLocaleString();
+        return;
+      }
+
+      const startTime = performance.now();
+      function tick(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(startVal + (endVal - startVal) * easeOut);
+        el.textContent = current.toLocaleString();
+
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = endVal.toLocaleString();
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    async function updateStats() {
+      try {
+        const res = await fetch("/topics");
+        if (!res.ok) return;
+        const allTopics = await res.json();
+
+        const counts = {
+          total: allTopics.length,
+          needsVerification: 0,
+          approved: 0,
+          rejected: 0,
+          verified: 0,
+          duplicate: 0
+        };
+
+        allTopics.forEach(t => {
+          if (t.status === "Approved") counts.approved++;
+          else if (t.status === "Rejected") counts.rejected++;
+          else if (t.status === "Verified") counts.verified++;
+          else if (t.status === "Duplicate") counts.duplicate++;
+          else counts.needsVerification++;
+        });
+
+        // Top stat cards
+        animateCountUp("stat-total", previousStatCounts.total, counts.total);
+        animateCountUp("stat-needs-verification", previousStatCounts.needsVerification, counts.needsVerification);
+        animateCountUp("stat-approved", previousStatCounts.approved, counts.approved);
+        animateCountUp("stat-rejected", previousStatCounts.rejected, counts.rejected);
+
+        // Sidebar badge counts
+        const allNoDup = counts.total - counts.duplicate;
+        document.getElementById("nav-count-all").textContent = allNoDup.toLocaleString();
+        document.getElementById("nav-count-needs-verification").textContent = counts.needsVerification.toLocaleString();
+        document.getElementById("nav-count-verified").textContent = counts.verified.toLocaleString();
+        document.getElementById("nav-count-approved").textContent = counts.approved.toLocaleString();
+        document.getElementById("nav-count-rejected").textContent = counts.rejected.toLocaleString();
+        document.getElementById("nav-count-duplicate").textContent = counts.duplicate.toLocaleString();
+
+        previousStatCounts = { ...counts };
+      } catch (e) {
+        // Silent catch for background stats
+      }
+    }
+
+    /* -----------------------------------------------------------
+       Skeleton Shimmer Placeholders
+       ----------------------------------------------------------- */
+    function renderSkeletons() {
+      const container = document.getElementById("topics-container");
+      container.innerHTML = Array.from({ length: 6 }).map(() => `
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skeleton-shimmer sk-title"></div>
+          <div class="skeleton-shimmer sk-meta"></div>
+          <div class="skeleton-shimmer sk-line"></div>
+          <div class="skeleton-shimmer sk-line" style="width: 70%;"></div>
+        </div>
+      `).join("");
+    }
+
+    /* -----------------------------------------------------------
+       Filter Views & Search Logic
+       ----------------------------------------------------------- */
+    function setFilter(filterName, btnElement) {
+      activeFilter = filterName;
+
+      // Update sidebar nav active classes
+      document.querySelectorAll(".nav-item-btn").forEach(btn => btn.classList.remove("active"));
+      if (btnElement) btnElement.classList.add("active");
+
+      // Update page title
+      document.getElementById("page-title").textContent = filterName === "All" ? "All Topics" : filterName;
+
+      loadTopics();
+    }
+
+    function handleSearch(query) {
+      searchQuery = (query || "").trim().toLowerCase();
+      applyFiltersAndRender();
+    }
+
+    function applyFiltersAndRender() {
+      let filtered = cachedTopics;
+
+      // "All" hides Duplicate topics; Duplicates only show under Duplicate tab
+      if (activeFilter === "All") {
+        filtered = filtered.filter(t => t.status !== "Duplicate");
+      }
+
+      // Filter by title or summary
+      if (searchQuery) {
+        filtered = filtered.filter(t => {
+          const title = (t.title || "").toLowerCase();
+          const summary = (t.summary || "").toLowerCase();
+          return title.includes(searchQuery) || summary.includes(searchQuery);
+        });
+      }
+
+      renderTopics(filtered);
+    }
+
+    /* -----------------------------------------------------------
+       Fetch Topics from API (GET /topics?status=...)
+       ----------------------------------------------------------- */
+    async function loadTopics(skipSkeleton = false) {
+      const container = document.getElementById("topics-container");
+      const errorBanner = document.getElementById("error-banner");
+      errorBanner.style.display = "none";
+
+      if (!skipSkeleton) {
+        renderSkeletons();
+      }
+
+      let url = "/topics";
+      if (activeFilter !== "All") {
+        url += `?status=${encodeURIComponent(activeFilter)}`;
+      }
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`Server returned HTTP ${res.status}`);
+        }
+
+        const topics = await res.json();
+        cachedTopics = topics || [];
+        applyFiltersAndRender();
+        updateStats();
+      } catch (err) {
+        container.innerHTML = "";
+        errorBanner.style.display = "flex";
+        document.getElementById("error-banner-message").textContent =
+          `Cannot reach server: ${err.message}. Ensure FastAPI is running.`;
+      }
+    }
+
+    function retryConnection() {
+      loadTopics();
+    }
+
+    /* -----------------------------------------------------------
+       Render Topic Cards
+       ----------------------------------------------------------- */
+    function renderTopics(topics) {
+      const container = document.getElementById("topics-container");
+
+      if (!topics || topics.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon-wrap" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <div class="empty-title">No topics to display</div>
+            <div class="empty-desc">
+              ${searchQuery
+                ? `No results match "${escapeHtml(searchQuery)}" in ${escapeHtml(activeFilter)}.`
+                : `No topics found under ${escapeHtml(activeFilter)} view.`
+              }
+            </div>
+            <button class="btn-run" onclick="triggerResearch()">Run Research Now</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = topics.map(topic => {
+        const showActions = topic.status === "Needs Verification" || topic.status === "Verified" || !topic.status;
+        const badge = getStatusBadgeConfig(topic.status);
+        const score = typeof topic.score === "number" ? Math.round(topic.score) : (parseInt(topic.score, 10) || 0);
+        const scoreClass = getScorePillClass(score);
+
+        // Published date fallback to created_at
+        const displayDate = topic.published_date || formatDate(topic.created_at);
+        const sourceName = topic.primary_source_name || topic.secondary_source_name || getDomainFromUrl(topic.source_url) || "";
+
+        // Meta separators only between existing items
+        const metaItems = [];
+        if (sourceName) metaItems.push(`<span class="meta-item">${escapeHtml(sourceName)}</span>`);
+        if (displayDate) metaItems.push(`<span class="meta-item">${escapeHtml(displayDate)}</span>`);
+        if (badge && badge.label) {
+          metaItems.push(`<span class="meta-item"><span class="badge ${badge.className}">${escapeHtml(badge.label)}</span></span>`);
+        }
+        const metaHtml = metaItems.join('<span class="meta-sep" aria-hidden="true">&bull;</span>');
+
+        // Primary & secondary sources
+        const primaryUrl = topic.primary_source_url;
+        const primaryName = topic.primary_source_name || getDomainFromUrl(primaryUrl) || "Primary source";
+        const secondaryUrl = topic.secondary_source_url;
+        const secondaryName = topic.secondary_source_name || getDomainFromUrl(secondaryUrl) || "Secondary source";
+
+        const summaryText = topic.summary || "No summary available.";
+        const evidenceText = topic.evidence || "";
+        const keyPointsList = parseKeyPoints(topic.key_points);
+
+        return `
+          <article
+            class="glass-card card-fade-in"
+            id="topic-card-${topic.id}"
+            onclick="toggleCardExpand(${topic.id})"
+          >
+            <div class="card-header">
+              <div class="card-title-group">
+                <!-- Title: max 2 lines with ellipsis -->
+                <h2 class="card-title" title="${escapeHtml(topic.title || 'Untitled')}">
+                  ${escapeHtml(topic.title || 'Untitled')}
+                </h2>
+                <!-- Meta Line -->
+                <div class="card-meta">
+                  ${metaHtml}
+                </div>
+              </div>
+
+              <!-- Score Pill -->
+              <span class="score-pill ${scoreClass}" title="Relevance Score: ${score}/100">
+                ${score}
+              </span>
+            </div>
+
+            <!-- Clamped 2-line summary with Read more toggle -->
+            <div onclick="event.stopPropagation()">
+              <p id="summary-${topic.id}" class="summary-text clamped">
+                ${escapeHtml(summaryText)}
+              </p>
+              <button
+                id="readmore-${topic.id}"
+                class="read-more-btn"
+                style="display: none;"
+                onclick="toggleSummaryClamp(${topic.id}, event)"
+              >
+                Read more
+              </button>
+            </div>
+
+            <!-- Smoothly Expandable Details Section -->
+            <div class="card-expanded-details" id="expanded-details-${topic.id}">
+              <div class="card-expanded-content" onclick="event.stopPropagation()">
+                
+                <!-- Full Summary -->
+                <div>
+                  <div class="detail-section-label">Summary</div>
+                  <p style="font-size: 13px; color: var(--text-main); line-height: 1.55;">
+                    ${escapeHtml(summaryText)}
+                  </p>
+                </div>
+
+                <!-- Key Points Bullet List -->
+                ${keyPointsList.length > 0 ? `
+                  <div>
+                    <div class="detail-section-label">Key Points</div>
+                    <ul class="key-points-list">
+                      ${keyPointsList.map(pt => `<li>${escapeHtml(pt)}</li>`).join("")}
+                    </ul>
+                  </div>
+                ` : ''}
+
+                <!-- Evidence Notes -->
+                ${evidenceText ? `
+                  <div>
+                    <div class="detail-section-label">Evidence Notes</div>
+                    <div class="evidence-box">${escapeHtml(evidenceText)}</div>
+                  </div>
+                ` : ''}
+
+                <!-- Primary & Secondary Sources -->
+                <div class="source-links-group">
+                  <div class="detail-section-label">Sources</div>
+
+                  ${primaryUrl ? `
+                    <div class="source-link-item">
+                      <span style="color: var(--text-muted);">Primary source:</span>
+                      <a href="${escapeHtml(primaryUrl)}" target="_blank" rel="noopener noreferrer">
+                        ${escapeHtml(primaryName)}
+                      </a>
+                    </div>
+                  ` : `
+                    <div class="source-link-item">
+                      <span class="no-primary-note">Original source not found</span>
+                    </div>
+                  `}
+
+                  ${secondaryUrl ? `
+                    <div class="source-link-item">
+                      <span style="color: var(--text-muted);">Secondary source:</span>
+                      <a href="${escapeHtml(secondaryUrl)}" target="_blank" rel="noopener noreferrer">
+                        ${escapeHtml(secondaryName)}
+                      </a>
+                    </div>
+                  ` : ''}
+
+                  ${(!primaryUrl && !secondaryUrl && topic.source_url) ? `
+                    <div class="source-link-item">
+                      <span style="color: var(--text-muted);">Source URL:</span>
+                      <a href="${escapeHtml(topic.source_url)}" target="_blank" rel="noopener noreferrer">
+                        ${escapeHtml(topic.source_url)}
+                      </a>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <!-- Small Approve and Reject Buttons -->
+                ${showActions ? `
+                  <div class="card-actions">
+                    <button
+                      class="btn-action btn-approve"
+                      onclick="updateTopicStatus(${topic.id}, 'approve', event)"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Approve
+                    </button>
+                    <button
+                      class="btn-action btn-reject"
+                      onclick="updateTopicStatus(${topic.id}, 'reject', event)"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                      Reject
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      checkSummaryOverflows(topics);
+    }
+
+    /* -----------------------------------------------------------
+       Summary Clamp Check (Show "Read more" only if > 2 lines)
+       ----------------------------------------------------------- */
+    function checkSummaryOverflows(topics) {
+      requestAnimationFrame(() => {
+        topics.forEach(t => {
+          const el = document.getElementById(`summary-${t.id}`);
+          const btn = document.getElementById(`readmore-${t.id}`);
+          if (el && btn) {
+            if (el.scrollHeight > el.clientHeight + 1) {
+              btn.style.display = "inline-block";
+            } else {
+              btn.style.display = "none";
+            }
+          }
+        });
+      });
+    }
+
+    function toggleSummaryClamp(topicId, e) {
+      if (e) e.stopPropagation();
+      const el = document.getElementById(`summary-${topicId}`);
+      const btn = document.getElementById(`readmore-${topicId}`);
+      if (!el || !btn) return;
+
+      const isClamped = el.classList.toggle("clamped");
+      btn.textContent = isClamped ? "Read more" : "Show less";
+    }
+
+    /* -----------------------------------------------------------
+       Smooth Expand / Collapse
+       ----------------------------------------------------------- */
+    function toggleCardExpand(topicId) {
+      const details = document.getElementById(`expanded-details-${topicId}`);
+      if (!details) return;
+
+      if (details.style.maxHeight && details.style.maxHeight !== "0px") {
+        details.style.maxHeight = "0px";
+      } else {
+        details.style.maxHeight = details.scrollHeight + "px";
+      }
+    }
+
+    /* -----------------------------------------------------------
+       Approve or Reject Topic (POST /topics/{id}/approve & reject)
+       ----------------------------------------------------------- */
+    async function updateTopicStatus(topicId, action, e) {
+      if (e) e.stopPropagation();
+      const cardEl = document.getElementById(`topic-card-${topicId}`);
+
+      try {
+        const res = await fetch(`/topics/${topicId}/${action}`, { method: "POST" });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Failed to ${action} topic`);
+        }
+
+        // Fade card out smoothly, then refresh list and stats
+        if (cardEl) {
+          cardEl.classList.add("card-fade-out");
+        }
+
+        const actionPast = action === "approve" ? "Approved" : "Rejected";
+        showToast("success", `Topic ${actionPast}`, `Topic #${topicId} marked as ${actionPast}.`);
+
+        setTimeout(() => {
+          loadTopics(true);
+        }, 180);
+
+      } catch (err) {
+        showToast("error", "Action Failed", err.message);
+      }
+    }
+
+    /* -----------------------------------------------------------
+       Trigger Research Run (POST /run?max_topics=10)
+       ----------------------------------------------------------- */
+    async function triggerResearch() {
+      const runBtn = document.getElementById("run-btn");
+      const runBtnText = document.getElementById("run-btn-text");
+      const runBtnIcon = document.getElementById("run-btn-icon");
+
+      runBtn.disabled = true;
+      runBtnText.textContent = "Running...";
+      runBtnIcon.innerHTML = `
+        <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+          <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+        </svg>
+      `;
+
+      try {
+        const res = await fetch("/run?max_topics=10", { method: "POST" });
+        if (!res.ok) {
+          throw new Error(`Server returned HTTP ${res.status}`);
+        }
+
+        const counts = await res.json();
+        const found = counts.found ?? 0;
+        const saved = counts.saved ?? 0;
+        const duplicates = counts.duplicates ?? 0;
+        const skipped = counts.skipped ?? 0;
+        const rejected = counts.rejected ?? 0;
+        const failed = counts.failed ?? 0;
+
+        // Update the "Last run" card metrics
+        document.getElementById("lr-found").textContent = found;
+        document.getElementById("lr-saved").textContent = saved;
+        document.getElementById("lr-duplicates").textContent = duplicates;
+        document.getElementById("lr-skipped").textContent = skipped;
+        document.getElementById("lr-rejected").textContent = rejected;
+        document.getElementById("lr-failed").textContent = failed;
+
+        // Slide in Glass Toast
+        showToast(
+          "success",
+          "Research Run Complete",
+          `Found ${found} &bull; Saved ${saved} &bull; Duplicates ${duplicates} &bull; Skipped ${skipped} &bull; Rejected ${rejected} &bull; Failed ${failed}`
+        );
+
+        loadTopics();
+      } catch (err) {
+        showToast("error", "Research Run Failed", err.message);
+      } finally {
+        runBtn.disabled = false;
+        runBtnText.textContent = "Run Research Now";
+        runBtnIcon.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        `;
+      }
+    }
+
+    /* -----------------------------------------------------------
+       Glass Toast Notifications (Slide in top right, auto-dismiss 4s)
+       ----------------------------------------------------------- */
+    function showToast(type, title, message) {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `glass-toast toast-${type}`;
+
+      let iconSvg = "";
+      if (type === "success") {
+        iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+      } else if (type === "error") {
+        iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+      } else {
+        iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+      }
+
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-body">
+          <div class="toast-title">${escapeHtml(title)}</div>
+          <div class="toast-message">${message}</div>
+        </div>
+      `;
+
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.add("show");
+      });
+
+      // Auto dismiss after 4 seconds
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => {
+          if (toast.parentNode === container) {
+            container.removeChild(toast);
+          }
+        }, 200);
+      }, 4000);
+    }
+
+    /* -----------------------------------------------------------
+       Initialization
+       ----------------------------------------------------------- */
+    window.addEventListener("DOMContentLoaded", () => {
+      loadTopics();
+    });
+  </script>
+</body>
+</html>
