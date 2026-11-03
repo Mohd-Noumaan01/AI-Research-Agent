@@ -35,7 +35,7 @@ def ask_llm(prompt: str) -> Optional[str]:
         "messages": [
             {"role": "user", "content": prompt}
         ],
-        "max_tokens": 1500,
+        "max_tokens": 400,
         "temperature": 0.2,
         "response_format": {"type": "json_object"},
     }
@@ -70,7 +70,8 @@ def analyze_topic(title: str, text: str, source_name: str) -> Dict[str, Any]:
         "suggested_status": "Needs Verification",
     }
 
-    prompt = f"""You are an AI research assistant helping content writers review recent developments.
+    prompt = f"""You are an elite research analyst preparing editorial briefs for an automated content agent and human tech writers.
+Analyze this development and synthesize a content-ready brief.
 
 Title: {title}
 Source Name: {source_name}
@@ -79,10 +80,10 @@ Content:
 
 Return ONLY a valid JSON object with exactly these keys:
 {{
-  "summary": "2-3 lines in plain language summarizing what was announced or found, suitable for a content writer",
-  "key_points": "- First key takeaway\\n- Second key takeaway\\n- Third key takeaway",
-  "claims": ["list of main factual claims found in the text"],
-  "evidence_notes": "what in the text supports each claim, or state that it is unclear",
+  "summary": "A high-impact editorial briefing (3-4 well-structured sentences) written specifically for content creators. Explain: 1) What core breakthrough, model release, or major development occurred, 2) The practical significance, industry impact, or benchmark metrics, and 3) The strategic takeaway for developers, businesses, or researchers. Write in engaging, professional prose free of Markdown artifacts (###), navigation text, or generic filler.",
+  "key_points": "- Core Announcement: [What specifically was launched or discovered]\\n- Key Evidence/Data: [Exact metrics, benchmark scores, or dates]\\n- Content Angle: [Suggested hook or narrative angle for writers]",
+  "claims": ["List of main factual claims extracted from the source"],
+  "evidence_notes": "Specific evidence supporting or questioning these claims from the text",
   "suggested_status": "Likely Supported" or "Needs Verification"
 }}
 

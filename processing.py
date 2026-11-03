@@ -7,6 +7,30 @@ from llm import analyze_topic
 from sources import is_allowed, get_source
 
 
+def clean_snippet_text(text: str) -> str:
+    """Cleans raw web snippet text by stripping markdown headers, nav artifacts, and excess symbols."""
+    if not text:
+        return "No content available."
+    import re
+    # Remove markdown headers and dividers (###, ##, ---)
+    cleaned = re.sub(r"[#\-*_]{2,}\s*", "", text)
+    cleaned = re.sub(r"#+\s*", "", cleaned)
+    # Remove image captions and metadata labels
+    cleaned = re.sub(r"Image\s*\d+:?[^\n]*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"Author\s+[A-Za-z0-9_\-]+", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"View all|Keep reading|Read more", "", cleaned, flags=re.IGNORECASE)
+    # Normalize whitespaces
+    cleaned = " ".join(cleaned.split())
+    if len(cleaned) > 280:
+        cut = cleaned[:280]
+        last_punct = max(cut.rfind("."), cut.rfind("!"), cut.rfind("?"))
+        if last_punct > 80:
+            cleaned = cut[:last_punct + 1]
+        else:
+            cleaned = cut.rstrip() + "..."
+    return cleaned
+
+
 # Helper to check title similarity against already known titles
 def is_title_duplicate(title: str, existing_titles: List[str], threshold: float = 0.85) -> bool:
     """Returns True if the title is over 85% similar to an existing title."""
@@ -174,17 +198,15 @@ def run_research(max_topics: int = 10) -> Dict[str, int]:
 
             # e. Safe fallback summary
             if not analysis or not isinstance(analysis, dict):
-                clean_snippet = " ".join(snippet.split())
-                summary = clean_snippet[:300] if clean_snippet else "No content available."
+                summary = clean_snippet_text(snippet)
                 evidence = "AI analysis unavailable - snippet only"
                 key_points = ""
                 claims = []
                 suggested_status = "Needs Verification"
             else:
                 raw_summary = analysis.get("summary", "")
-                if not raw_summary or raw_summary.startswith("Analysis failed"):
-                    clean_snippet = " ".join(snippet.split())
-                    summary = clean_snippet[:300] if clean_snippet else "No content available."
+                if not raw_summary or raw_summary.startswith("Analysis failed") or "###" in raw_summary:
+                    summary = clean_snippet_text(snippet)
                     evidence = "AI analysis unavailable - snippet only"
                 else:
                     summary = raw_summary
